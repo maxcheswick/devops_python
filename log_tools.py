@@ -50,15 +50,18 @@ def filter_by_time(file_path, start_time, end_time):
     
     start = datetime.datetime.strptime(start_time, fmt)
     end =datetime.datetime.strptime(end_time, fmt)
-    
+    # print(f"DEBUG: start = {start}, end = {end}")
     results = []
     
     for line in lines:
+        
         try:
             # Expect the timestamp to be like:
             # "2025-11-18 12:34:56 ERROR Something happened"
             # So timestamp is the first two items when split by space
-            parts.line.split(" ")
+            
+            parts = line.split(" ")
+            # print(f"DEBUG: part1: {parts[0]}, part2: {parts[1]}")
             timestamp = parts[0] + " " + parts[1]
             ts = datetime.datetime.strptime(timestamp, fmt)
             

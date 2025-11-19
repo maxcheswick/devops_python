@@ -1,46 +1,39 @@
-import sys
+import argparse
 import log_tools
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage:")
-        print("  python main.py level <log_file> <LEVEL>")
-        print("  python main.py time  <log_file> <START> <END>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="DevOps Python Log Utility")
     
-    mode = sys.argv[1]
+    sub = parser.add_subparsers(dest="command")
     
-    if mode == "level":
-        if len(sys.argv) != 4:
-            print("Usage: python main.py level <log_file> <LEVEL>")
-            sys.exit(1)
-            
-        log_file = sys.argv[2]
-        level = sys.argv[3]
+    #logs command
+    logs = sub.add_parser("logs", help="Filter logs by level or time range")
+    logs.add_argument("--file", required=True, help="Path to the log file")
+    logs.add_argument("--level", help="Log level to filter by(ERROR, DEBUG, etc)")
+    logs.add_argument("--start", help="Start time (YYYY-MM-DD HH:MM:SS)")
+    logs.add_argument("--end", help="End time (YYYY-MM-DD HH:MM:SS)")
+    
+    count = sub.add_parser("count", help="Count log levels in a file")
+    count.add_argument("--file", required=True, help="Path to log file")
+    
+    args = parser.parse_args()
+    
+    if args.command == "logs":
+        if args.level:
+            out = log_tools.filter_by_level(args.file, args.level)
+            print(f"Found {len(out)} lines filtered by {args.level}")
+            for line in out:
+                print(line.rstrip())
+        elif args.start and args.end:
+            out = log_tools.filter_by_time(args.file, args.start, args.end)
+            print(f"Found {len(out)} lines filtered by start: {args.start} end: {args.end}")
+            for line in out:
+                print(line.rstrip())
+        else:
+            print(f"You must supply either --level or both --start and --end")
+    elif args.command == "count":
+        print(f"Need to add count function")
         
-        filtered = log_tools.filter_by_level(log_file, level)
-        # filtered = log_tools.read_logs(log_file)
-        
-        print(f"Read {len(filtered)} from file {log_file} with log level {level}")
-        
-        for line in filtered[:5]:
-            print(line.rstrip())
-    elif mode == "time":
-        if len(sys.argv) != 5:
-            print("  python main.py time  <log_file> <START> <END>")
-            sys.exit(1)
-        
-        log_file = sys.argv[2]
-        start = sys.argv[3]
-        end = sys.argv[4]
-        
-        filtered = log_tools.filter_by_time(log_file, start, end)
-        for line in filtered[:5]:
-            print(line.rstrip())
-    else:
-        print(f"Unknown mode: {mode}")
-        sys.exit(1)
-            
         
 if __name__ == "__main__":
     main()
